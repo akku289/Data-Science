@@ -1,0 +1,25 @@
+library(data.table)
+library(readxl)
+EastWestAirlines <- read_xlsx("C:/Users/kiit/Desktop/CSV/EastWestAirlines.xlsx", sheet = "data")
+colnames(EastWestAirlines)
+ncol(EastWestAirlines)
+sub_EastWestAirlines <- EastWestAirlines[,2:12]
+norm_airline <- scale(sub_EastWestAirlines)
+distanct_airline <- dist(norm_airline,method="euclidean")
+str(distanct_airline)
+airline_clust <- hclust(distanct_airline, method = "complete")
+group_airline <- cutree(airline_clust,k=5)
+EastWestAirlines_New <- cbind(EastWestAirlines, group_airline)
+setnames(EastWestAirlines_New, 'group_airline', 'group_hclust')
+aggregate(EastWestAirlines_New[,2:12],by= list(EastWestAirlines_New$group_hclust), FUN = mean)
+airline_kmeans <- kmeans(norm_airline,5)
+str(airline_kmeans)
+airline_kmeans$centers
+EastWestAirlines_New <- cbind(EastWestAirlines_New, airline_kmeans$cluster)
+colnames(EastWestAirlines_New)
+aggregate(EastWestAirlines_New[,2:12],by= list(EastWestAirlines_New$`airline_kmeans$cluster`), FUN = mean)
+library(cluster)
+xcl <- clara(norm_airline,5) #Using Centroid
+clusplot(xcl)
+xpm <- pam(norm_airline,5) # Using Medoids
+clusplot(xpm)
